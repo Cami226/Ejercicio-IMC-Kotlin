@@ -25,31 +25,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+
+
+
 import com.bootcamp.ejerciciodiezkotlin.components.MultiButtonSegmented
 import com.bootcamp.ejerciciodiezkotlin.components.Space
+import com.bootcamp.ejerciciodiezkotlin.viewmodel.CalcularViewModel
+
+
+
+
 
 @Composable
-fun HomeView() {
-    var selectGenero by remember { mutableStateOf("Hombre")}
-    var edad by remember { mutableStateOf("") }
-    var peso by remember { mutableStateOf("") }
-    var altura by remember { mutableStateOf("") }
-    var resultadoIMC by remember { mutableStateOf("") }
+fun HomeView(viewModel: CalcularViewModel = viewModel()) {
+  val state = viewModel.state.value
 
 
-    fun calcularIMC(peso: String, altura: String): String {
-        val pesoNum = peso.toFloatOrNull()
-        val alturaNum = altura.toFloatOrNull()?.div(100) // Convertimos cm a m
 
-        return if (pesoNum != null && alturaNum != null && alturaNum > 0) {
-            val imc = pesoNum / (alturaNum * alturaNum)
-            "%.1f".format(imc) // Formatear a un decimal
-        }
-
-        else {
-            "Error: Datos inválidos"
-        }
-    }
 
 
 
@@ -72,15 +66,15 @@ fun HomeView() {
 
         MultiButtonSegmented(
             options = listOf("Hombre", "Mujer"),
-            selectedOption = selectGenero,
-            onOptionSelected = { selectGenero = it }
+            selectedOption = state.genero,
+            onOptionSelected = { viewModel.onGeneroSelected(it) }
         )
 
         Space()
 
         OutlinedTextField(
-            value = edad,
-            onValueChange = { edad = it },
+            value = state.edad,
+            onValueChange = { viewModel.onEdadChanged(it) },
             label = {Text("Edad (años)")}
         )
 
@@ -88,8 +82,8 @@ fun HomeView() {
         Space()
 
         OutlinedTextField(
-            value = peso,
-            onValueChange = { peso = it },
+            value = state.peso,
+            onValueChange = { viewModel.onPesoChanged(it) },
             label = {Text("Peso (Kg)")}
         )
 
@@ -97,8 +91,8 @@ fun HomeView() {
 
 
         OutlinedTextField(
-            value = altura,
-            onValueChange = { altura = it},
+            value = state.altura,
+            onValueChange = { viewModel.onAlturaChanged(it)},
             label = {Text("Altura (cm)")}
         )
 
@@ -108,7 +102,7 @@ fun HomeView() {
 
         Button(
             onClick = {
-                resultadoIMC = calcularIMC(peso, altura)
+                viewModel.calcularIMC()
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -120,10 +114,11 @@ fun HomeView() {
 
         Space()
 
-        Text(text = "IMC: $resultadoIMC",
+        Text(text = "IMC: ${state.resultadoIMC}",
             style = MaterialTheme.typography.bodyLarge,
         modifier = Modifier.padding(36.dp),
-        fontSize = 50.sp)
+        fontSize = 50.sp
+        )
 
     }
 
